@@ -1,116 +1,47 @@
-# BỘ TEST CASE FAILED – TRANG ĐĂNG NHẬP VĂN PHÒNG ĐIỆN TỬ UTC
+# B1: THIẾT KẾ TEST CASE – XÂY DỰNG CÁC CA KIỂM THỬ
 
-**URL kiểm thử:** https://vanphongdientu.utc.edu.vn/Login?r=https%3A%2F%2Fvanphongdientu.utc.edu.vn%2F
+**Trang kiểm thử:** vanphongdientu.utc.edu.vn/Login
 **Màn hình:** Đăng nhập hệ thống Văn phòng điện tử – Trường ĐH Giao thông Vận tải
-**Loại test case:** Negative / Failed (các kịch bản mong đợi hệ thống **từ chối đăng nhập** hoặc **báo lỗi**)
+**Loại:** Test case failed (ca kiểm thử mong đợi hệ thống **từ chối đăng nhập** / **báo lỗi**)
 **Ngày tạo:** 08/10/2026
-**Người tạo:** QA Team
 
 ---
 
-## 1. Mô tả các thành phần trên màn hình
+## Bảng các ca kiểm thử
 
-| Thành phần | Thuộc tính kỹ thuật | Ghi chú |
-|---|---|---|
-| Ô Tên đăng nhập | `input[type=text][name=username]`, placeholder "Tên đăng nhập" | Không có `maxlength`, không `required`, không `autocomplete` |
-| Ô Mật khẩu | `input[type=password][name=userpwd]`, placeholder "Mật khẩu" | Không có `maxlength`, không `required` |
-| Checkbox "Giữ tôi luôn đăng nhập" | `input[type=checkbox][name=persistent][value=1]` | Mặc định không tích |
-| Nút Đăng nhập | `input[type=submit].submit_login` | Submit form `POST /Login` |
-| Trường ẩn redirect | `input[type=hidden][name=r]` | Chứa URL quay về sau đăng nhập |
-| Link "Đăng nhập bằng e-mail UTC" | Google OAuth2 | `redirect_uri` đang dùng `http://` |
-| Link "Bạn quên mật khẩu đăng nhập?" | `/Login/GetPass` | |
-| Cookie phiên | `sso_utc_token_office` | Session SSO |
-
-**Thông báo lỗi thực tế của hệ thống (đã xác minh):**
-- Bỏ trống tên đăng nhập → `Bạn chưa nhập tên đăng nhập`
-- Bỏ trống mật khẩu → `Bạn chưa nhập mật khẩu`
-- Sai tài khoản/mật khẩu → `Tài khoản hoặc mật khẩu không đúng.`
-
----
-
-## 2. Bộ Test Case Failed
-
-> **Quy ước kết quả:** Mỗi test case ở trạng thái FAILED nghĩa là hệ thống **PHẢI** ngăn đăng nhập và/hoặc hiển thị thông báo lỗi phù hợp. Nếu hệ thống cho đăng nhập thành công hoặc không báo lỗi → test **FAIL thực sự (lỗi phần mềm)**.
-
-### Nhóm A – Kiểm tra trường bắt buộc (Required / Empty)
-
-| ID | Tiêu đề | Điều kiện tiên quyết | Dữ liệu nhập | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|---|---|
-| TC_F01 | Để trống cả hai trường | Đang ở trang Login | username = `""`, password = `""` | 1. Không nhập gì<br>2. Nhấn **Đăng nhập** | Hiển thị `Bạn chưa nhập tên đăng nhập`; không đăng nhập; vẫn ở trang Login |
-| TC_F02 | Để trống tên đăng nhập | | username = `""`, password = `123456` | 1. Chỉ nhập mật khẩu<br>2. Nhấn **Đăng nhập** | Hiển thị `Bạn chưa nhập tên đăng nhập`; không đăng nhập |
-| TC_F03 | Để trống mật khẩu | | username = `someuser`, password = `""` | 1. Chỉ nhập tên đăng nhập<br>2. Nhấn **Đăng nhập** | Hiển thị `Bạn chưa nhập mật khẩu`; không đăng nhập |
-| TC_F04 | Nhập toàn khoảng trắng | | username = `"   "`, password = `"   "` | 1. Nhập toàn dấu cách<br>2. Nhấn **Đăng nhập** | Hệ thống trim và báo lỗi thiếu dữ liệu / sai thông tin; không đăng nhập |
-| TC_F05 | Chỉ có khoảng trắng ở tên, mật khẩu hợp lệ | | username = `"  "`, password = `Abc@123` | 1. Nhập<br>2. Nhấn **Đăng nhập** | Báo lỗi tên đăng nhập không hợp lệ; không đăng nhập |
-
-### Nhóm B – Sai thông tin xác thực (Authentication)
-
-| ID | Tiêu đề | Dữ liệu nhập | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|---|
-| TC_F06 | Tài khoản không tồn tại | username = `user_khong_ton_tai_999`, password = `Any@123` | Nhập → Nhấn Đăng nhập | `Tài khoản hoặc mật khẩu không đúng.`; không đăng nhập |
-| TC_F07 | Đúng tài khoản, sai mật khẩu | username = `<tài khoản hợp lệ>`, password = `sai_mat_khau` | Nhập → Nhấn Đăng nhập | `Tài khoản hoặc mật khẩu không đúng.`; không tiết lộ username có tồn tại hay không |
-| TC_F08 | Sai cả tài khoản và mật khẩu | username = `aaaa`, password = `bbbb` | Nhập → Nhấn Đăng nhập | `Tài khoản hoặc mật khẩu không đúng.` |
-| TC_F09 | Sai hoa/thường mật khẩu | username = `<hợp lệ>`, password = `<đúng nhưng đổi hoa-thường>` | Nhập → Nhấn Đăng nhập | Mật khẩu phân biệt hoa thường → báo sai; không đăng nhập |
-| TC_F10 | Thừa khoảng trắng đầu/cuối mật khẩu | username = `<hợp lệ>`, password = `" matkhau "` | Nhập → Nhấn Đăng nhập | Báo sai thông tin (nếu không trim password); không đăng nhập |
-| TC_F11 | Tài khoản đã bị khóa/vô hiệu hóa | username = `<tài khoản bị khóa>`, password = `<đúng>` | Nhập → Nhấn Đăng nhập | Thông báo tài khoản bị khóa/không hoạt động; không đăng nhập |
-| TC_F12 | Đăng nhập lại bằng mật khẩu cũ sau khi đã đổi | username = `<hợp lệ>`, password = `<mật khẩu cũ>` | Nhập → Nhấn Đăng nhập | `Tài khoản hoặc mật khẩu không đúng.` |
-
-### Nhóm C – Dữ liệu bất thường / Định dạng (Boundary & Format)
-
-| ID | Tiêu đề | Dữ liệu nhập | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|---|
-| TC_F13 | Tên đăng nhập quá dài | username = chuỗi 1000 ký tự, password = `Abc@123` | Nhập → Nhấn Đăng nhập | Không crash; báo lỗi sai thông tin hoặc giới hạn độ dài; không đăng nhập |
-| TC_F14 | Mật khẩu quá dài | username = `<hợp lệ>`, password = chuỗi 5000 ký tự | Nhập → Nhấn Đăng nhập | Không crash; báo sai thông tin; không đăng nhập |
-| TC_F15 | Ký tự Unicode/emoji trong tên | username = `tên😀đăngnhập`, password = `Abc@123` | Nhập → Nhấn Đăng nhập | Báo sai thông tin; không crash; không đăng nhập |
-| TC_F16 | Ký tự đặc biệt trong tên | username = `admin'--`, password = `x` | Nhập → Nhấn Đăng nhập | Báo sai thông tin; **không** thực thi (chống SQL Injection) |
-| TC_F17 | Chuỗi SQL Injection cổ điển | username = `' OR '1'='1`, password = `' OR '1'='1` | Nhập → Nhấn Đăng nhập | **Không** đăng nhập được; báo sai thông tin; không lỗi 500 |
-| TC_F18 | Chuỗi XSS trong trường nhập | username = `<script>alert(1)</script>`, password = `x` | Nhập → Nhấn Đăng nhập | Dữ liệu được escape; không chạy script; báo sai thông tin |
-| TC_F19 | Khoảng trắng giữa chuỗi tên | username = `ab cd`, password = `Abc@123` | Nhập → Nhấn Đăng nhập | Báo sai thông tin (nếu username không chứa space); không đăng nhập |
-| TC_F20 | Dán giá trị có ký tự xuống dòng | username = `user\nadmin`, password = `x` | Dán → Nhấn Đăng nhập | Xử lý an toàn; báo sai thông tin; không crash |
-
-### Nhóm D – Bảo mật & Phiên làm việc (Security / Session)
-
-| ID | Tiêu đề | Dữ liệu / Thao tác | Các bước thực hiện | Kết quả mong đợi |
-|---|---|---|---|---|
-| TC_F21 | Brute-force / thử sai nhiều lần | Sai mật khẩu liên tiếp ≥ 5–10 lần | Nhập sai lặp lại | Hệ thống nên khóa tạm / CAPTCHA / giới hạn; **không** cho thử vô hạn |
-| TC_F22 | Thao túng trường redirect `r` | Sửa hidden `r` = `https://evil-site.com` | Sửa DOM → đăng nhập | Hệ thống **không** redirect ra domain ngoài (chống Open Redirect) |
-| TC_F23 | Gửi POST thiếu trường `r` | Bỏ hidden `r` khỏi request | Gửi request thủ công | Xử lý mặc định an toàn; không lỗi 500 |
-| TC_F24 | Mật khẩu bị gửi dạng rõ qua HTTP | | Bắt gói request | Form phải submit qua **HTTPS**; mật khẩu không lộ |
-| TC_F25 | OAuth redirect_uri không an toàn | `redirect_uri` của Google dùng `http://` | Kiểm tra link OAuth | **FAIL bảo mật** nếu dùng `http://` thay vì `https://` |
-| TC_F26 | Truy cập trang nội bộ khi chưa đăng nhập | | Mở trực tiếp URL nội bộ sau Login | Bị chuyển về trang Login; không truy cập được |
-| TC_F27 | Dùng lại cookie phiên đã hết hạn | Cookie `sso_utc_token_office` cũ | Gửi request với cookie hết hạn | Yêu cầu đăng nhập lại; không nhận phiên cũ |
-| TC_F28 | Nhấn Back sau khi đăng xuất | Đã logout | Nhấn Back trình duyệt | Không vào lại được hệ thống; quay về Login |
-| TC_F29 | Thông báo lỗi lộ thông tin | Sai username vs sai password | So sánh 2 thông báo | Thông báo giống nhau (`Tài khoản hoặc mật khẩu không đúng.`), không phân biệt để tránh dò tài khoản |
-
-### Nhóm E – Giao diện & Trải nghiệm (UI/UX khi lỗi)
-
-| ID | Tiêu đề | Thao tác | Kết quả mong đợi |
-|---|---|---|---|
-| TC_F30 | Thông báo lỗi hiển thị rõ ràng | Submit sai | Thông báo lỗi hiển thị tại vùng dễ thấy, tiếng Việt đúng chính tả |
-| TC_F31 | Dữ liệu đã nhập sau khi lỗi | Submit sai | Vì lý do bảo mật, **mật khẩu phải bị xóa**; username có thể giữ lại |
-| TC_F32 | Double-click nút Đăng nhập | Nhấn nhanh 2 lần | Không gửi 2 request / không lỗi phiên; chỉ xử lý 1 lần |
-| TC_F33 | Nhấn Enter khi để trống | Focus ô password rỗng → Enter | Hiển thị lỗi thiếu dữ liệu (giống nhấn nút) |
-| TC_F34 | Tắt JavaScript rồi submit rỗng | Disable JS → submit | Vẫn có validate phía server, báo lỗi; không đăng nhập |
+| STT | ID | Description | Steps | Expected Output |
+|:---:|:---|:---|:---|:---|
+| 1 | TC_F01 | Để trống cả username và password | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Không nhập username<br>3. Không nhập password<br>4. Click vào nút Đăng nhập | Bạn chưa nhập tên đăng nhập |
+| 2 | TC_F02 | Để trống username, có nhập password | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Click vào ô password<br>3. Nhập password là "123456"<br>4. Click vào nút Đăng nhập | Bạn chưa nhập tên đăng nhập |
+| 3 | TC_F03 | Có username, để trống password | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Click vào ô username<br>3. Nhập username là "someuser"<br>4. Click vào nút Đăng nhập | Bạn chưa nhập mật khẩu |
+| 4 | TC_F04 | Nhập toàn khoảng trắng ở cả hai ô | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là "   " (dấu cách)<br>3. Nhập password là "   " (dấu cách)<br>4. Click vào nút Đăng nhập | Không đăng nhập; vẫn ở trang Login (báo thiếu/sai thông tin) |
+| 5 | TC_F06 | Đăng nhập với tài khoản không tồn tại | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Click vào ô username<br>3. Nhập username là "user_khong_ton_tai_999"<br>4. Nhập password là "Any@123"<br>5. Click vào nút Đăng nhập | Tài khoản hoặc mật khẩu không đúng. |
+| 6 | TC_F07 | Đúng tên đăng nhập, sai mật khẩu | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là \<tài khoản hợp lệ><br>3. Nhập password sai<br>4. Click vào nút Đăng nhập | Tài khoản hoặc mật khẩu không đúng. |
+| 7 | TC_F08 | Sai cả tài khoản lẫn mật khẩu | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là "aaaa"<br>3. Nhập password là "bbbb"<br>4. Click vào nút Đăng nhập | Tài khoản hoặc mật khẩu không đúng. |
+| 8 | TC_F13 | Tên đăng nhập quá dài (1000 ký tự) | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là chuỗi 1000 ký tự "a"<br>3. Nhập password là "Abc@123"<br>4. Click vào nút Đăng nhập | Không crash; không đăng nhập; vẫn ở trang Login |
+| 9 | TC_F15 | Tên đăng nhập chứa Unicode/emoji | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là "tên😀đăngnhập"<br>3. Nhập password là "Abc@123"<br>4. Click vào nút Đăng nhập | Không crash; không đăng nhập |
+| 10 | TC_F17 | Chuỗi SQL Injection | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là `' OR '1'='1`<br>3. Nhập password là `' OR '1'='1`<br>4. Click vào nút Đăng nhập | Không đăng nhập được; không lộ lỗi SQL ra giao diện |
+| 11 | TC_F18 | Chuỗi XSS trong trường nhập | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là `<script>alert(1)</script>`<br>3. Nhập password là "x"<br>4. Click vào nút Đăng nhập | Dữ liệu được escape; không chạy script; không đăng nhập |
+| 12 | TC_F24 | Trang Login phải phục vụ qua HTTPS | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Quan sát URL trên thanh địa chỉ | URL bắt đầu bằng https:// |
+| 13 | TC_F25 | Kiểm tra redirect_uri của nút "Đăng nhập bằng e-mail UTC" | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Kiểm tra thuộc tính href của nút OAuth | redirect_uri dùng https:// (hiện đang http:// → lỗi bảo mật) |
+| 14 | TC_F29 | Thông báo lỗi không tiết lộ tài khoản tồn tại (chống dò tài khoản) | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username không tồn tại<br>3. Nhập password bất kỳ<br>4. Click vào nút Đăng nhập | Tài khoản hoặc mật khẩu không đúng. (thông điệp chung) |
+| 15 | TC_F31 | Mật khẩu bị xóa sau khi đăng nhập lỗi | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập username là "aaaa"<br>3. Nhập password là "secret_pw_123"<br>4. Click vào nút Đăng nhập<br>5. Quan sát ô password sau khi báo lỗi | Báo "Tài khoản hoặc mật khẩu không đúng." và ô mật khẩu trống |
+| 16 | TC_F33 | Nhấn Enter khi để trống username | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Để trống username<br>3. Đặt con trỏ vào ô password, nhấn Enter | Bạn chưa nhập tên đăng nhập |
+| 17 | TC_F21 | Thử sai nhiều lần liên tiếp (brute-force) | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Nhập sai mật khẩu liên tiếp ≥ 5–10 lần<br>3. Click vào nút Đăng nhập mỗi lần | Hệ thống khóa tạm / hiện CAPTCHA (kiểm tra thủ công) |
+| 18 | TC_F22 | Thao túng tham số redirect `r` (open redirect) | 1. Mở trang vanphongdientu.utc.edu.vn<br>2. Sửa trường ẩn `r` thành domain ngoài (vd https://evil.com)<br>3. Đăng nhập | Hệ thống không redirect ra domain ngoài |
 
 ---
 
-## 3. Mẫu ghi nhận kết quả thực thi
+## Ghi chú & rủi ro tiềm ẩn (quan sát từ trang thực tế)
 
-| ID | Trạng thái (Pass/Fail) | Kết quả thực tế | Ảnh chụp | Ghi chú |
-|---|---|---|---|---|
-| TC_F01 | | | | |
-| TC_F02 | | | | |
-| ... | | | | |
+1. Các ô input thiếu `maxlength`, `required`, `autocomplete` → nên bổ sung validate và giới hạn độ dài (liên quan TC_F13).
+2. **OAuth `redirect_uri` đang dùng `http://`** thay vì `https://` → rủi ro bảo mật (TC_F25).
+3. Trường ẩn `r` nhận URL tuyệt đối → cần kiểm tra chống Open Redirect (TC_F22).
+4. Thông báo lỗi gộp chung cho sai username/password là tốt (tránh dò tài khoản – TC_F29).
+5. Chưa quan sát thấy cơ chế chống brute-force → cần kiểm tra (TC_F21).
 
----
-
-## 4. Ghi chú quan sát & rủi ro tiềm ẩn (từ khảo sát trang)
-
-1. **Thiếu thuộc tính HTML cơ bản:** các ô input không có `maxlength`, `required`, `autocomplete` → nên bổ sung validate và giới hạn độ dài phía client lẫn server (liên quan TC_F13, TC_F14).
-2. **OAuth `redirect_uri` dùng `http://`** thay vì `https://` → rủi ro bảo mật (TC_F25).
-3. **Trường redirect `r`** là hidden và nhận URL tuyệt đối → cần kiểm tra chống Open Redirect (TC_F22).
-4. **Thông báo lỗi gộp chung** cho sai username/password là tốt (tránh user enumeration) → giữ nguyên (TC_F29).
-5. **Cần kiểm tra cơ chế chống brute-force** (khóa tài khoản/CAPTCHA) vì hiện chưa quan sát thấy (TC_F21).
-
----
-
-*Tài liệu phục vụ mục đích kiểm thử chất lượng (QA) trên hệ thống được phép truy cập.*
+> Các thông báo lỗi trong cột Expected Output là **thông điệp thực tế đã xác minh** trên hệ thống:
+> `Bạn chưa nhập tên đăng nhập` · `Bạn chưa nhập mật khẩu` · `Tài khoản hoặc mật khẩu không đúng.`
+>
+> Bộ test case này được tự động hóa bằng Selenium Python trong thư mục `selenium_tests/`
+> (mỗi ID `TC_Fxx` tương ứng một file `test_TC_Fxx.py`).
